@@ -27,6 +27,7 @@
             --bg-main: #030712;
             --bg-sidebar: #111827;
             --bg-card: #1f2937;
+            --bg-table-header: #374151;
             --text-main: #e5e7eb;
             --text-secondary: #9ca3af;
             --text-header: #ffffff;
@@ -40,6 +41,7 @@
             --bg-main: #f9fafb;
             --bg-sidebar: #ffffff;
             --bg-card: #ffffff;
+            --bg-table-header: #e5e7eb;
             --text-main: #1f2937;
             --text-secondary: #6b7280;
             --text-header: #111827;
@@ -53,6 +55,7 @@
             --bg-main: #0b1120;
             --bg-sidebar: #1c2541;
             --bg-card: #2a3858;
+            --bg-table-header: #3a506b;
             --text-main: #e0e0e0;
             --text-secondary: #a7aebb;
             --text-header: #ffffff;
@@ -72,6 +75,7 @@
         .bg-main { background-color: var(--bg-main); }
         .bg-sidebar { background-color: var(--bg-sidebar); }
         .bg-card { background-color: var(--bg-card); }
+        .bg-table-header { background-color: var(--bg-table-header); }
         .text-main { color: var(--text-main); }
         .text-secondary { color: var(--text-secondary); }
         .text-header { color: var(--text-header); }
@@ -106,6 +110,16 @@
             font-weight: 700;
             color: var(--accent-color);
             line-height: 1;
+        }
+        #seconds-value {
+            /* Adatta la dimensione del testo per evitare overflow su schermi piccoli */
+            font-size: 1.8rem;
+            word-break: break-all;
+        }
+        @media (min-width: 640px) {
+            #seconds-value {
+                font-size: 2.25rem;
+            }
         }
         .time-label {
             font-size: 0.875rem;
@@ -231,7 +245,7 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 p-4 md:p-8 overflow-y-auto bg-main">
+        <main class="flex-1 p-4 pt-16 md:p-8 overflow-y-auto bg-main">
             <button id="open-sidebar-btn" class="md:hidden fixed top-4 left-4 z-20 bg-sidebar p-2 rounded-md text-header">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
             </button>
@@ -265,7 +279,7 @@
                         <div id="life-in-numbers-display" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
                     </section>
                 </div>
-                <div id="summary" class="view"><section class="card bg-card"><h2 class="text-2xl font-bold mb-4 accent-text-color">Riepilogo per <span class="active-person-name"></span></h2><div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-700"><tr><th class="p-3">Unità di Misura</th><th class="p-3">Valore Totale</th></tr></thead><tbody id="summary-table-body"></tbody></table></div></section></div>
+                <div id="summary" class="view"><section class="card bg-card"><h2 class="text-2xl font-bold mb-4 accent-text-color">Riepilogo per <span class="active-person-name"></span></h2><div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-table-header"><tr><th class="p-3">Unità di Misura</th><th class="p-3">Valore Totale</th></tr></thead><tbody id="summary-table-body"></tbody></table></div></section></div>
                 <div id="timeline" class="view"><section class="card bg-card"><h2 class="text-2xl font-bold mb-4 accent-text-color">Timeline di <span class="active-person-name"></span></h2><div id="timeline-container" class="relative"></div></section></div>
                 <div id="custom-events" class="view"><section class="card bg-card"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold accent-text-color">Eventi Personali di <span class="active-person-name"></span></h2><button id="open-add-event-modal-btn" class="text-sm accent accent-hover p-2 px-4 rounded-md transition-colors">Aggiungi Evento</button></div><ul id="custom-events-list" class="space-y-3"></ul></section></div>
                 <div id="calculator" class="view"><section class="card bg-card"><h2 class="text-2xl font-bold mb-4 accent-text-color">Calcolatore Traguardi</h2><p class="text-secondary mb-4">Scopri quando <span class="active-person-name"></span> raggiungerà un traguardo.</p><div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"><div><label class="block mb-2 text-sm font-medium">Unità</label><select id="milestone-unit" class="w-full"><option value="seconds">Secondi</option><option value="minutes">Minuti</option><option value="hours">Ore</option><option value="days">Giorni</option><option value="weeks">Settimane</option><option value="months">Mesi</option><option value="years">Anni</option></select></div><div><label class="block mb-2 text-sm font-medium">Traguardo</label><input type="number" id="milestone-target" placeholder="es. 10000" class="w-full"></div><div class="text-center text-secondary text-sm">Attuale: <span id="current-milestone-value" class="font-bold text-main">0</span></div></div><div id="milestone-result-container" class="mt-6 text-center p-4 bg-main rounded-lg hidden"><p class="text-lg">Data del traguardo:</p><p id="milestone-result-date" class="text-2xl font-bold accent-text-color mt-1"></p><div id="calendar-link-wrapper" class="mt-4"></div></div></section></div>
