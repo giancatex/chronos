@@ -6,10 +6,10 @@
     <title>Chronos LifeTracker</title>
     <!-- PWA Meta -->
     <meta name="theme-color" content="#10b981">
+    <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Chronos Tracker">
-    <link rel="apple-touch-icon" href="/icon-192x192.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -265,14 +265,16 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // PWA Setup
-            const setupPWA = () => {
-                const manifest = { "name": "Chronos LifeTracker", "short_name": "ChronosTracker", "start_url": ".", "display": "standalone", "background_color": "#030712", "theme_color": "#10b981", "description": "Traccia il tempo della tua vita.", "icons": [{"src": "/icon-192x192.png", "sizes": "192x192", "type": "image/png"}, {"src": "/icon-512x512.png", "sizes": "512x512", "type": "image/png"}] };
-                const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-                const manifestURL = URL.createObjectURL(manifestBlob);
-                document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="${manifestURL}">`);
-            };
-            setupPWA();
+            // PWA Service Worker Registration
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js').then(registration => {
+                        console.log('Service Worker registrato con successo:', registration);
+                    }).catch(registrationError => {
+                        console.log('Registrazione Service Worker fallita:', registrationError);
+                    });
+                });
+            }
 
             // DOM Elements
             const personSelect = document.getElementById('person-select');
@@ -501,8 +503,8 @@
 
                 timelineContainer.innerHTML = '<div class="timeline-line"></div>' + allEvents.map(event => {
                     if (!event.date || isNaN(event.date.getTime())) {
-                        console.error("Invalid date found for event:", event);
-                        return ''; // Skip rendering this item
+                        console.error("Data non valida trovata per l'evento:", event);
+                        return ''; // Salta questo elemento
                     }
                     const isPast = event.date < now;
                     const formattedDate = new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: 'long', year: 'numeric' }).format(event.date);
@@ -673,6 +675,4 @@
     </script>
 </body>
 </html>
-
-
 
