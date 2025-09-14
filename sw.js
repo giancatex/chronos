@@ -1,8 +1,9 @@
-const CACHE_NAME = 'chronos-lifetracker-cache-v1';
+const CACHE_NAME = 'chronos-lifetracker-cache-v2'; // Aumento la versione per forzare l'aggiornamento
 const urlsToCache = [
   '.',
   'index.html',
-  'manifest.json'
+  'manifest.json',
+  'icons/icon.svg' // Aggiungo solo l'icona SVG alla cache
 ];
 
 self.addEventListener('install', event => {
@@ -19,10 +20,8 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
+        // Se la risorsa è in cache, la restituisco, altrimenti la richiedo alla rete
+        return response || fetch(event.request);
       })
   );
 });
@@ -33,6 +32,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
+          // Rimuovo le vecchie versioni della cache
           if (cacheWhitelist.indexOf(cacheName) === -1) {
             return caches.delete(cacheName);
           }
