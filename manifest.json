@@ -1,1 +1,22 @@
-{"name": "Chronos LifeTracker","short_name": "ChronosTracker","start_url": ".","display": "standalone","background_color": "#030712","theme_color": "#10b981","description": "Traccia il tempo della tua vita.","icons": [{"src": "/icon-192x192.png","sizes": "192x192","type": "image/png"},{"src": "/icon-512x512.png","sizes": "512x512","type": "image/png"}]}
+{
+  "name": "Chronos LifeTracker",
+  "short_name": "ChronosTracker",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#10b981",
+  "description": "Traccia il tempo della tua vita.",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzEwYjk4MSI+PHBhdGggZD0iTTEyIDJhMTAgMTAgMCAxIDAgMTAgMTBBMTAgMTAgMCAwIDAgMTIgMnptMCAxOGE4IDggMCAxIDEgOC04IDggOCAwIDAgMS04IDh6Ii8+PHBhdGggZD0iTTEyLjUgN3Y1LjIxbDQuMjkgMi40Ny0uNzggMS4zNS01LTIuODhWN3oiLz48L3N2Zz4=",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzEwYjk4MSI+PHBhdGggZD0iTTEyIDJhMTAgMTAgMCAxIDAgMTAgMTBBMTAgMTAgMCAwIDAgMTIgMnptMCAxOGE4IDggMCAxIDEgOC04IDggOCAwIDAgMS04IDh6Ii8+PHBhdGggZD0iTTEyLjUgN3Y1LjIxbDQuMjkgMi40Ny0uNzggMS4zNS01LTIuODhWN3oiLz48L3N2Zz4=",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
+```
