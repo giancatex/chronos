@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chronos LifeTracker</title>
-    <!-- PWA Meta -->
-    <meta name="theme-color" content="#10b981">
+
+    <!-- PWA Manifest and Theme -->
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#10b981">
+
+    <!-- iOS PWA Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Chronos Tracker">
+    <link rel="apple-touch-icon" href="logo.png">
+
+    <!-- Favicon -->
+    <link rel="icon" href="logo.png" type="image/png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -180,7 +187,8 @@
         <aside id="sidebar" class="fixed inset-y-0 left-0 bg-sidebar w-72 p-4 border-r border-color flex-col space-y-4 z-40 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out flex">
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-text-color"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 6v6l4 2"></path></svg>
+                    <!-- LOGO INSERITO QUI -->
+                    <img src="logo.png" alt="Chronos Logo" class="h-8 w-8">
                     <h1 class="text-xl font-bold ml-2 text-header">Chronos Tracker</h1>
                 </div>
                 <button id="close-sidebar-btn" class="md:hidden text-secondary hover:text-header">
@@ -229,7 +237,7 @@
             </button>
             
             <div id="no-person-view" class="text-center h-full flex flex-col justify-center items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600 mb-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <img src="logo.png" alt="Chronos Logo" class="h-16 w-16 mb-6">
                 <h2 class="text-3xl font-bold text-header mb-4">Benvenuto!</h2>
                 <p class="text-secondary mb-6 max-w-md">Per iniziare, aggiungi il primo membro della tua famiglia usando il pulsante "Aggiungi Profilo".</p>
             </div>
@@ -241,13 +249,20 @@
                         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4" id="age-display"></div>
                          <div class="grid grid-cols-1 mt-4"><div class="time-unit"><div id="seconds-value" class="time-value">0</div><div class="time-label">SECONDI TOTALI</div></div></div>
                     </section>
+
                     <section class="card bg-card">
-                        <h2 class="text-2xl font-bold mb-4 accent-text-color">Statistiche Biometriche Stimate</h2>
-                        <div id="biometrics-display" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+                        <h2 class="text-2xl font-bold mb-4 accent-text-color">Prossimo Grande Traguardo</h2>
+                        <div id="next-milestone-countdown-container" class="text-center">
+                            <p id="next-milestone-name" class="text-xl font-semibold text-main mb-4">Caricamento...</p>
+                            <div id="countdown-display" class="grid grid-cols-4 gap-2 md:gap-4">
+                                <!-- Countdown units will be injected here -->
+                            </div>
+                        </div>
                     </section>
-                     <section class="card bg-card">
-                        <h2 class="text-2xl font-bold mb-4 accent-text-color">Prossimi 5 Traguardi di <span class="active-person-name"></span></h2>
-                         <ul id="upcoming-milestones-list" class="space-y-3"></ul>
+
+                    <section class="card bg-card">
+                        <h2 class="text-2xl font-bold mb-4 accent-text-color">La tua Vita in Numeri</h2>
+                        <div id="life-in-numbers-display" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
                     </section>
                 </div>
                 <div id="summary" class="view"><section class="card bg-card"><h2 class="text-2xl font-bold mb-4 accent-text-color">Riepilogo per <span class="active-person-name"></span></h2><div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-700"><tr><th class="p-3">Unità di Misura</th><th class="p-3">Valore Totale</th></tr></thead><tbody id="summary-table-body"></tbody></table></div></section></div>
@@ -262,14 +277,15 @@
     <!-- Modals -->
     <div id="add-person-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden items-center justify-center"><div class="card bg-sidebar w-full max-w-md m-4"><h2 class="text-xl font-bold text-header mb-4">Aggiungi Profilo</h2><div class="space-y-4"><input type="text" id="modal-new-person-name" placeholder="Nome" class="w-full text-sm"><div><label class="text-sm text-secondary">Data di nascita</label><input type="date" id="modal-birthdate" class="w-full text-sm"></div><div><label class="text-sm text-secondary">Ora di nascita</label><input type="time" id="modal-birthtime" class="w-full text-sm"></div><div class="flex justify-end space-x-3 pt-2"><button id="modal-cancel-btn" class="text-sm bg-gray-600 hover:bg-gray-700 p-2 px-4 rounded-md transition-colors text-white">Annulla</button><button id="modal-add-btn" class="text-sm accent accent-hover p-2 px-4 rounded-md transition-colors">Salva</button></div></div></div></div>
     <div id="add-event-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden items-center justify-center"><div class="card bg-sidebar w-full max-w-md m-4"><h2 class="text-xl font-bold text-header mb-4">Aggiungi Evento Personale</h2><div class="space-y-4"><input type="text" id="modal-event-name" placeholder="Nome evento (es. Laurea)" class="w-full text-sm"><div><label class="text-sm text-secondary">Data evento</label><input type="date" id="modal-event-date" class="w-full text-sm"></div><div><label class="text-sm text-secondary">Ora evento</label><input type="time" id="modal-event-time" class="w-full text-sm" value="00:00"></div><div class="flex justify-end space-x-3 pt-2"><button id="modal-event-cancel-btn" class="text-sm bg-gray-600 hover:bg-gray-700 p-2 px-4 rounded-md transition-colors text-white">Annulla</button><button id="modal-event-add-btn" class="text-sm accent accent-hover p-2 px-4 rounded-md transition-colors">Salva Evento</button></div></div></div></div>
+    <div id="timeline-detail-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden items-center justify-center"><div class="card bg-sidebar w-full max-w-md m-4"><h2 id="modal-timeline-event-name" class="text-xl font-bold text-header mb-2">Nome Evento</h2><p id="modal-timeline-event-date" class="text-sm text-secondary mb-4">Data Evento</p><div class="bg-main p-4 rounded-lg"><p class="text-sm text-secondary">All'epoca di questo evento, <span class="active-person-name"></span> aveva:</p><p id="modal-timeline-age-at-event" class="text-lg font-bold text-main mt-1"></p></div><div class="flex justify-end pt-4"><button id="modal-timeline-close-btn" class="text-sm accent accent-hover p-2 px-4 rounded-md transition-colors">Chiudi</button></div></div></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // PWA Service Worker Registration
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('sw.js', { scope: '.' }).then(registration => {
-                        console.log('Service Worker registrato con successo con scope:', registration.scope);
+                    navigator.serviceWorker.register('sw.js').then(registration => {
+                        console.log('Service Worker registrato con successo:', registration);
                     }).catch(registrationError => {
                         console.log('Registrazione Service Worker fallita:', registrationError);
                     });
@@ -284,10 +300,8 @@
             const activePersonNameSpans = document.querySelectorAll('.active-person-name');
             
             // Views & Lists
-            const upcomingMilestonesList = document.getElementById('upcoming-milestones-list');
             const summaryTableBody = document.getElementById('summary-table-body');
             const familyMilestonesList = document.getElementById('family-milestones-list');
-            const biometricsDisplay = document.getElementById('biometrics-display');
             const customEventsList = document.getElementById('custom-events-list');
             const timelineContainer = document.getElementById('timeline-container');
             
@@ -300,6 +314,8 @@
             const openAddEventModalBtn = document.getElementById('open-add-event-modal-btn');
             const modalEventCancelBtn = document.getElementById('modal-event-cancel-btn');
             const modalEventAddBtn = document.getElementById('modal-event-add-btn');
+            const timelineDetailModal = document.getElementById('timeline-detail-modal');
+            const modalTimelineCloseBtn = document.getElementById('modal-timeline-close-btn');
 
             // Calculator
             const milestoneUnit = document.getElementById('milestone-unit');
@@ -438,9 +454,9 @@
                 const person = getActivePerson();
                 if (!person) return;
                 updateLiveAge(now, birthDateTime);
-                updateBiometrics(now, birthDateTime);
+                updateLifeInNumbers(now, birthDateTime);
+                updateNextMilestoneCountdown(now, birthDateTime);
                 updateSummaryTable(now, birthDateTime);
-                updateUpcomingMilestones(now, birthDateTime);
                 updateFamilyMilestones(now);
                 updateCustomEventsList(now, person);
                 updateTimeline(now, person);
@@ -480,15 +496,6 @@
                 ].map(u => `<div class="time-unit"><div class="time-value">${String(u.value).padStart(2, '0')}</div><div class="time-label">${u.label}</div></div>`).join('');
                 document.getElementById('seconds-value').textContent = Math.floor((now - birthDateTime) / 1000).toLocaleString('it-IT');
             };
-
-            const updateBiometrics = (now, birthDateTime) => {
-                const seconds = (now - birthDateTime) / 1000;
-                const heartbeats = Math.floor(seconds * (70 / 60)); // Avg 70 bpm
-                const breaths = Math.floor(seconds * (16 / 60)); // Avg 16 bpm
-                biometricsDisplay.innerHTML = `
-                    <div class="time-unit"><div class="time-value">${heartbeats.toLocaleString('it-IT')}</div><div class="time-label">BATTITI CARDIACI (stima)</div></div>
-                    <div class="time-unit"><div class="time-value">${breaths.toLocaleString('it-IT')}</div><div class="time-label">RESPIRI (stima)</div></div>`;
-            };
             
             const updateCustomEventsList = (now, person) => {
                 if (!person || !person.customEvents) { customEventsList.innerHTML = ''; return; }
@@ -502,6 +509,105 @@
                     }).join('');
             };
 
+            // --- Milestone Calculation (Revised Logic) ---
+
+            const findNextRoundNumber = (currentValue) => {
+                if (currentValue < 1) return 1;
+                const strValue = Math.floor(currentValue).toString();
+                const magnitude = Math.pow(10, strValue.length - 1);
+                const base = currentValue / magnitude;
+
+                const steps = [1.1, 1.2, 1.25, 1.3, 1.4, 1.5, 1.6, 1.7, 1.75, 1.8, 1.9, 2, 2.5, 3, 4, 5, 6, 7, 7.5, 8, 9, 10];
+                
+                for (const step of steps) {
+                    if (step > base) {
+                        const result = step * magnitude;
+                        return magnitude > 1000 ? Math.round(result) : result;
+                    }
+                }
+                return 10 * magnitude;
+            };
+
+            const findPreviousRoundNumber = (currentValue) => {
+                if (currentValue < 1) return 0;
+                const strValue = Math.floor(currentValue).toString();
+                const magnitude = Math.pow(10, strValue.length - 1);
+                const base = currentValue / magnitude;
+                
+                const steps = [10, 9, 8, 7.5, 7, 6, 5, 4, 3, 2.5, 2, 1.9, 1.8, 1.75, 1.7, 1.6, 1.5, 1.4, 1.3, 1.25, 1.2, 1.1, 1];
+
+                for (const step of steps) {
+                    if (step < base) {
+                        const result = step * magnitude;
+                        return magnitude > 1000 ? Math.round(result) : result;
+                    }
+                }
+                if (magnitude > 1) return 9 * (magnitude / 10);
+                return 0;
+            };
+
+            const calculateDateForMilestone = (target, unit, birthDateTime) => {
+                let resultDate;
+                if (unit === 'years') {
+                    resultDate = new Date(birthDateTime);
+                    resultDate.setFullYear(birthDateTime.getFullYear() + Math.ceil(target));
+                } else if (unit === 'months') {
+                    resultDate = new Date(birthDateTime);
+                    resultDate.setMonth(birthDateTime.getMonth() + Math.ceil(target));
+                } else {
+                    const msPerUnit = { seconds: 1000, minutes: 60000, hours: 3600000, days: 86400000, weeks: 604800000 }[unit];
+                    if (!msPerUnit) return null;
+                    resultDate = new Date(birthDateTime.getTime() + target * msPerUnit);
+                }
+                return resultDate;
+            };
+
+            const getAllMilestonesForPerson = (now, person) => {
+                const birthDateTime = new Date(`${person.birthDate}T${person.birthTime}`);
+                const units = [
+                    { name: 'seconds', label: 'secondi' }, { name: 'minutes', label: 'minuti' },
+                    { name: 'hours', label: 'ore' }, { name: 'days', label: 'giorni' },
+                    { name: 'weeks', label: 'settimane' }, { name: 'months', label: 'mesi' },
+                    { name: 'years', label: 'anni' }
+                ];
+                const allMilestones = [];
+                units.forEach(unitInfo => {
+                    let currentValue = getTotalValueInUnit(now, birthDateTime, unitInfo.name);
+                    if (currentValue < 0) return;
+                    
+                    let nextValue = currentValue;
+                    for (let i = 0; i < 3; i++) {
+                        nextValue = findNextRoundNumber(nextValue);
+                        const date = calculateDateForMilestone(nextValue, unitInfo.name, birthDateTime);
+                        if (date) allMilestones.push({ value: nextValue, unit: unitInfo.label, date, person });
+                    }
+                    
+                    let prevValue = findPreviousRoundNumber(currentValue);
+                    if (prevValue > 0) {
+                        const date = calculateDateForMilestone(prevValue, unitInfo.name, birthDateTime);
+                        if (date) allMilestones.push({ value: prevValue, unit: unitInfo.label, date, person });
+                    }
+                });
+                return [...new Map(allMilestones.map(m => [`${m.value}-${m.unit}`, m])).values()];
+            };
+
+            const calculateAgeAtDate = (birthDateTime, eventDate) => {
+                let years = eventDate.getFullYear() - birthDateTime.getFullYear();
+                let months = eventDate.getMonth() - birthDateTime.getMonth();
+                let days = eventDate.getDate() - birthDateTime.getDate();
+                
+                if (days < 0) {
+                    months--;
+                    const prevMonth = new Date(eventDate.getFullYear(), eventDate.getMonth(), 0);
+                    days += prevMonth.getDate();
+                }
+                if (months < 0) {
+                    years--;
+                    months += 12;
+                }
+                return `${years} anni, ${months} mesi e ${days} giorni`;
+            };
+
             const updateTimeline = (now, person) => {
                 if (!person) return;
                 const customEvents = (person.customEvents || []).map(e => ({
@@ -509,74 +615,21 @@
                     text: e.name,
                     type: 'custom'
                 }));
-                const milestones = getMilestonesForPerson(now, person);
-
+                const milestones = getAllMilestonesForPerson(now, person)
+                    .map(m => ({ ...m, text: `${m.value.toLocaleString('it-IT')} ${m.unit}` }));
                 const allEvents = [...customEvents, ...milestones].sort((a, b) => a.date - b.date);
-
-                timelineContainer.innerHTML = '<div class="timeline-line"></div>' + allEvents.map(event => {
+                timelineContainer.innerHTML = allEvents.map(event => {
                     if (!event.date || isNaN(event.date.getTime())) return '';
                     const isPast = event.date < now;
                     const formattedDate = new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: 'long', year: 'numeric' }).format(event.date);
-                    return `<div class="timeline-item"><div class="timeline-point ${isPast ? 'past' : ''}"></div><p class="font-bold text-main">${event.text}</p><p class="text-sm text-secondary">${formattedDate}</p></div>`;
+                    const eventDateISO = event.date.toISOString();
+                    return `<div class="timeline-item clickable-timeline-item" data-event-name="${event.text.replace(/"/g, '&quot;')}" data-event-date="${eventDateISO}" style="cursor: pointer;">
+                                <div class="timeline-line" style="left: 0.05rem;"></div>
+                                <div class="timeline-point ${isPast ? 'past' : ''}"></div>
+                                <p class="font-bold text-main pointer-events-none">${event.text}</p>
+                                <p class="text-sm text-secondary pointer-events-none">${formattedDate}</p>
+                            </div>`;
                 }).join('');
-            };
-
-            const getMilestonesForPerson = (now, person) => {
-                const birthDateTime = new Date(`${person.birthDate}T${person.birthTime}`);
-                const units = ['seconds', 'minutes', 'hours', 'days', 'weeks', 'years'];
-                let allMilestones = [];
-
-                units.forEach(unit => {
-                    const currentValue = getTotalValueInUnit(now, birthDateTime, unit);
-                    if (currentValue <= 0) return;
-                    
-                    const futureVal = findNextRoundNumber(currentValue);
-                    addMilestone(futureVal, unit, birthDateTime, allMilestones);
-
-                    const pastVal = findPreviousRoundNumber(currentValue);
-                    if (pastVal > 0) addMilestone(pastVal, unit, birthDateTime, allMilestones);
-                });
-                return [...new Map(allMilestones.map(item => [item.text, item])).values()];
-            };
-
-            const addMilestone = (value, unit, birthDateTime, collection) => {
-                let milestoneDate;
-                if (unit === 'years') {
-                    milestoneDate = new Date(birthDateTime);
-                    milestoneDate.setFullYear(birthDateTime.getFullYear() + Math.ceil(value));
-                } else if (unit === 'months') {
-                     milestoneDate = new Date(birthDateTime);
-                     milestoneDate.setMonth(birthDateTime.getMonth() + Math.ceil(value));
-                }
-                else {
-                    const msPerUnit = { seconds: 1000, minutes: 60000, hours: 3600000, days: 86400000, weeks: 604800000 }[unit];
-                    milestoneDate = new Date(birthDateTime.getTime() + value * msPerUnit);
-                }
-                collection.push({ value: value, unit: unit, date: milestoneDate, text: `${value.toLocaleString('it-IT')} ${unit}` });
-            };
-
-            const findNextRoundNumber = (currentValue) => {
-                if (currentValue <= 0) return 10;
-                const orderOfMagnitude = Math.pow(10, Math.floor(Math.log10(currentValue)));
-                let nextValue = Math.ceil(currentValue / orderOfMagnitude) * orderOfMagnitude;
-                if (nextValue * 0.95 <= currentValue) { // To avoid getting same number
-                    nextValue += orderOfMagnitude;
-                }
-                if (nextValue === 0) nextValue = orderOfMagnitude; // Handle edge case
-                 // Special logic for smaller numbers
-                if(currentValue < 100) {
-                   if (currentValue < 10) return 10;
-                   if (currentValue < 25) return 25;
-                   if (currentValue < 50) return 50;
-                   return 100;
-                }
-                return nextValue;
-            };
-
-            const findPreviousRoundNumber = (currentValue) => {
-                if (currentValue <= 10) return 0;
-                const orderOfMagnitude = Math.pow(10, Math.floor(Math.log10(currentValue)));
-                return Math.floor(currentValue / orderOfMagnitude) * orderOfMagnitude;
             };
             
             const getTotalValueInUnit = (now, birthDateTime, unit) => {
@@ -588,15 +641,14 @@
                     case 'days': return diff / 86400000;
                     case 'weeks': return diff / 604800000;
                     case 'months': return (now.getFullYear() - birthDateTime.getFullYear()) * 12 + (now.getMonth() - birthDateTime.getMonth());
-                    case 'years': return diff / 31557600000; // 365.25 days for leap years
+                    case 'years': return diff / 31557600000;
                     default: return 0;
                 }
             };
             
             const renderMilestoneLi = (milestone, person, isFamily = false) => {
-                const unitLabel = { seconds: 'secondi', minutes: 'minuti', hours: 'ore', days: 'giorni', weeks: 'settimane', months: 'mesi', years: 'anni'}[milestone.unit];
-                const title = `Traguardo di ${person.name}: ${milestone.value.toLocaleString('it-IT')} ${unitLabel}`;
-                const description = `Il giorno in cui ${person.name} raggiungerà ${milestone.value.toLocaleString('it-IT')} ${unitLabel} di vita.`;
+                const title = `Traguardo di ${person.name}: ${milestone.value.toLocaleString('it-IT')} ${milestone.unit}`;
+                const description = `Il giorno in cui ${person.name} raggiungerà ${milestone.value.toLocaleString('it-IT')} ${milestone.unit} di vita.`;
                 const calendarHref = generateCalendarLink(title, milestone.date, description);
                 const formatter = new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
                 
@@ -604,7 +656,7 @@
                     ? `<a href="${calendarHref}" target="_blank" rel="noopener noreferrer" class="text-sm accent accent-hover p-2 rounded-md transition-colors">Salva</a>` 
                     : '';
 
-                return `<li class="p-3 bg-main rounded-lg flex justify-between items-center border border-color"><div class="pr-2"><p class="font-bold text-lg accent-text-color">${milestone.value.toLocaleString('it-IT')} ${unitLabel} ${isFamily ? `<span class="text-sm font-medium text-main"> - ${person.name}</span>` : ''}</p><p class="text-sm text-secondary">${formatter.format(milestone.date)}</p></div><div>${saveButton}</div></li>`;
+                return `<li class="p-3 bg-main rounded-lg flex justify-between items-center border border-color"><div class="pr-2"><p class="font-bold text-lg accent-text-color">${milestone.value.toLocaleString('it-IT')} ${milestone.unit} ${isFamily ? `<span class="text-sm font-medium text-main"> - ${person.name}</span>` : ''}</p><p class="text-sm text-secondary">${formatter.format(milestone.date)}</p></div><div>${saveButton}</div></li>`;
             };
 
             const generateCalendarLink = (title, date, description) => {
@@ -620,26 +672,97 @@
                 summaryTableBody.innerHTML = units.map(unit => `<tr class="border-b border-color"><td class="p-3 font-medium">${labels[unit]}</td><td class="p-3 accent-text-color font-mono">${Math.floor(getTotalValueInUnit(now, birthDateTime, unit)).toLocaleString('it-IT')}</td></tr>`).join('');
             };
 
-            const updateUpcomingMilestones = (now, birthDateTime) => {
+            const getZodiacSign = (date) => {
+                const day = date.getDate();
+                const month = date.getMonth() + 1;
+                if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return "Acquario";
+                if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return "Pesci";
+                if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return "Ariete";
+                if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return "Toro";
+                if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return "Gemelli";
+                if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return "Cancro";
+                if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return "Leone";
+                if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return "Vergine";
+                if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) return "Bilancia";
+                if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) return "Scorpione";
+                if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return "Sagittario";
+                return "Capricorno";
+            };
+
+            const getGeneration = (birthYear) => {
+                if (birthYear >= 1997 && birthYear <= 2012) return "Gen Z";
+                if (birthYear >= 1981 && birthYear <= 1996) return "Millennial";
+                if (birthYear >= 1965 && birthYear <= 1980) return "Gen X";
+                if (birthYear >= 1946 && birthYear <= 1964) return "Baby Boomer";
+                if (birthYear >= 1928 && birthYear <= 1945) return "Silent Gen";
+                return "Anziana";
+            };
+
+            const updateLifeInNumbers = (now, birthDateTime) => {
+                const lifeInNumbersDisplay = document.getElementById('life-in-numbers-display');
+                const daysLived = getTotalValueInUnit(now, birthDateTime, 'days');
+                if (daysLived <= 0) {
+                    lifeInNumbersDisplay.innerHTML = '';
+                    return;
+                }
+                const yearsSlept = (daysLived / 3) / 365.25;
+                const sunrises = Math.floor(daysLived);
+                const zodiacSign = getZodiacSign(birthDateTime);
+                const generation = getGeneration(birthDateTime.getFullYear());
+
+                lifeInNumbersDisplay.innerHTML = `
+                    <div class="time-unit"><div class="time-value">${yearsSlept.toFixed(1)}</div><div class="time-label">ANNI DORMENDO</div></div>
+                    <div class="time-unit"><div class="time-value">${sunrises.toLocaleString('it-IT')}</div><div class="time-label">ALBE VISTE</div></div>
+                    <div class="time-unit"><div class="time-value" style="font-size: 1.5rem; padding-top: 0.5rem;">${zodiacSign}</div><div class="time-label">SEGNO ZODIACALE</div></div>
+                    <div class="time-unit"><div class="time-value" style="font-size: 1.5rem; padding-top: 0.5rem;">${generation}</div><div class="time-label">GENERAZIONE</div></div>
+                `;
+            };
+
+            const updateNextMilestoneCountdown = (now, birthDateTime) => {
                 const person = getActivePerson();
                 if (!person) return;
-                const upcoming = getMilestonesForPerson(now, person)
+                const nameEl = document.getElementById('next-milestone-name');
+                const displayEl = document.getElementById('countdown-display');
+
+                const upcoming = getAllMilestonesForPerson(now, person)
                     .filter(m => m.date > now)
-                    .sort((a,b) => a.date - b.date);
-                upcomingMilestonesList.innerHTML = upcoming.slice(0, 5).map(m => renderMilestoneLi(m, person)).join('');
+                    .sort((a, b) => a.date - b.date);
+
+                if (upcoming.length === 0) {
+                    nameEl.textContent = "Nessun traguardo imminente trovato.";
+                    displayEl.innerHTML = "";
+                    return;
+                }
+
+                const nextMilestone = upcoming[0];
+                nameEl.textContent = `${nextMilestone.value.toLocaleString('it-IT')} ${nextMilestone.unit}`;
+                
+                const diff = nextMilestone.date.getTime() - now.getTime();
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                displayEl.innerHTML = `
+                    <div class="time-unit"><div class="time-value">${String(days).padStart(2, '0')}</div><div class="time-label">GIORNI</div></div>
+                    <div class="time-unit"><div class="time-value">${String(hours).padStart(2, '0')}</div><div class="time-label">ORE</div></div>
+                    <div class="time-unit"><div class="time-value">${String(minutes).padStart(2, '0')}</div><div class="time-label">MINUTI</div></div>
+                    <div class="time-unit"><div class="time-value">${String(seconds).padStart(2, '0')}</div><div class="time-label">SECONDI</div></div>
+                `;
             };
 
             const updateFamilyMilestones = (now) => {
                 if (people.length === 0) return;
                 let allMilestones = [];
                 people.forEach(person => {
-                    const personMilestones = getMilestonesForPerson(now, person)
-                        .filter(m => m.date > now)
-                        .map(m => ({ ...m, person }));
+                    const personMilestones = getAllMilestonesForPerson(now, person)
+                        .filter(m => m.date > now);
                     allMilestones.push(...personMilestones);
                 });
-                allMilestones.sort((a, b) => a.date - b.date);
-                familyMilestonesList.innerHTML = allMilestones.slice(0, 10).map(m => renderMilestoneLi(m, m.person, true)).join('');
+                
+                const uniqueMilestones = [...new Map(allMilestones.map(item => [`${item.value}-${item.unit}-${item.person.id}`, item])).values()];
+                uniqueMilestones.sort((a, b) => a.date - b.date);
+                familyMilestonesList.innerHTML = uniqueMilestones.slice(0, 10).map(m => renderMilestoneLi(m, m.person, true)).join('');
             };
             
             const calculateAndDisplayMilestone = () => {
@@ -655,18 +778,8 @@
                     return;
                 }
 
-                let resultDate;
-                 if (unit === 'years') {
-                    resultDate = new Date(birthDateTime);
-                    resultDate.setFullYear(birthDateTime.getFullYear() + target);
-                } else if (unit === 'months') {
-                     resultDate = new Date(birthDateTime);
-                     resultDate.setMonth(birthDateTime.getMonth() + target);
-                }
-                else {
-                    const msPerUnit = { seconds: 1000, minutes: 60000, hours: 3600000, days: 86400000, weeks: 604800000 }[unit];
-                    resultDate = new Date(birthDateTime.getTime() + target * msPerUnit);
-                }
+                const resultDate = calculateDateForMilestone(target, unit, birthDateTime);
+                if(!resultDate) return;
                 
                 milestoneResultDate.textContent = resultDate.toLocaleString('it-IT', { dateStyle: 'full', timeStyle: 'medium' });
 
@@ -717,6 +830,26 @@
                     savePeople();
                     startTimerForActivePerson();
                 });
+
+                timelineContainer.addEventListener('click', e => {
+                    if (e.target.classList.contains('clickable-timeline-item')) {
+                        const person = getActivePerson();
+                        if (!person) return;
+
+                        const birthDateTime = new Date(`${person.birthDate}T${person.birthTime}`);
+                        const eventName = e.target.dataset.eventName;
+                        const eventDate = new Date(e.target.dataset.eventDate);
+
+                        document.getElementById('modal-timeline-event-name').textContent = eventName;
+                        document.getElementById('modal-timeline-event-date').textContent = new Intl.DateTimeFormat('it-IT', { dateStyle: 'full' }).format(eventDate);
+                        document.getElementById('modal-timeline-age-at-event').textContent = calculateAgeAtDate(birthDateTime, eventDate);
+
+                        timelineDetailModal.classList.replace('hidden', 'flex');
+                    }
+                });
+
+                modalTimelineCloseBtn.addEventListener('click', () => timelineDetailModal.classList.replace('flex', 'hidden'));
+                timelineDetailModal.addEventListener('click', e => { if (e.target === timelineDetailModal) timelineDetailModal.classList.replace('flex', 'hidden'); });
             };
 
             const setupNavigation = () => {
@@ -746,3 +879,4 @@
     </script>
 </body>
 </html>
+
