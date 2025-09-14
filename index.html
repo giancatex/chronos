@@ -111,6 +111,17 @@
             color: var(--accent-color);
             line-height: 1;
         }
+
+        /* FIX: Responsive font for countdown timer */
+        #countdown-display .time-value {
+            font-size: 1.75rem; /* Smaller font for small screens */
+        }
+        @media (min-width: 640px) {
+            #countdown-display .time-value {
+                font-size: 2.25rem; /* Restore original size for larger screens */
+            }
+        }
+
         #seconds-value {
             /* Adatta la dimensione del testo per evitare overflow su schermi piccoli */
             font-size: 1.8rem;
@@ -893,4 +904,5 @@
     </script>
 </body>
 </html>
+
 
