@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="it" class="theme-dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chronos LifeTracker</title>
+    <!-- PWA Meta -->
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Chronos Tracker">
+    <link rel="apple-touch-icon" href="/icon-192x192.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+     <style>
+        :root {
+            --bg-main: #030712;
+            --bg-sidebar: #111827;
+            --bg-card: #1f2937;
+            --text-main: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --text-header: #ffffff;
+            --border-color: #374151;
+            --accent-color: #10b981;
+            --accent-text: #ffffff;
+            --accent-hover: #059669;
+        }
+
+        .theme-light {
+            --bg-main: #f9fafb;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --text-main: #1f2937;
+            --text-secondary: #6b7280;
+            --text-header: #111827;
+            --border-color: #e5e7eb;
+            --accent-color: #10b981;
+            --accent-text: #ffffff;
+            --accent-hover: #059669;
+        }
+        
+        .theme-blue {
+            --bg-main: #0b1120;
+            --bg-sidebar: #1c2541;
+            --bg-card: #2a3858;
+            --text-main: #e0e0e0;
+            --text-secondary: #a7aebb;
+            --text-header: #ffffff;
+            --border-color: #3a506b;
+            --accent-color: #62b6cb;
+            --accent-text: #0b1120;
+            --accent-hover: #5fa8d3;
+        }
+
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .bg-main { background-color: var(--bg-main); }
+        .bg-sidebar { background-color: var(--bg-sidebar); }
+        .bg-card { background-color: var(--bg-card); }
+        .text-main { color: var(--text-main); }
+        .text-secondary { color: var(--text-secondary); }
+        .text-header { color: var(--text-header); }
+        .border-color { border-color: var(--border-color); }
+        .accent { background-color: var(--accent-color); color: var(--accent-text); }
+        .accent-text-color { color: var(--accent-color); }
+        .accent-hover:hover { background-color: var(--accent-hover); }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .time-unit {
+            background-color: #374151;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            border: 1px solid #4b5563;
+        }
+        .theme-light .time-unit {
+            background-color: #f3f4f6;
+            border-color: #e5e7eb;
+        }
+         .theme-blue .time-unit {
+            background-color: #3a506b;
+            border-color: #516d8c;
+        }
+        .time-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            line-height: 1;
+        }
+        .time-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+        input, select, .theme-select {
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 0.375rem;
+            padding: 0.625rem;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-card); }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+
+        /* Sidebar styles */
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            color: var(--text-secondary);
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .sidebar-link:hover {
+            background-color: var(--bg-card);
+            color: var(--text-header);
+        }
+        .sidebar-link.active {
+            background-color: var(--accent-color);
+            color: var(--accent-text);
+            font-weight: 600;
+        }
+        .view { display: none; }
+        .view.active { display: block; }
+        
+        /* Timeline specific styles */
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2.5rem;
+            padding-left: 2.5rem;
+        }
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+        .timeline-line {
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            bottom: -0.5rem;
+            width: 2px;
+            background-color: var(--border-color);
+        }
+        .timeline-point {
+            position: absolute;
+            left: -0.4rem;
+            top: 0.5rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 9999px;
+            border: 4px solid var(--bg-main);
+            background-color: var(--accent-color);
+        }
+         .timeline-point.past {
+            background-color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="relative min-h-screen md:flex">
+        <!-- Overlay for mobile -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 bg-sidebar w-72 p-4 border-r border-color flex-col space-y-4 z-40 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out flex">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-text-color"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 6v6l4 2"></path></svg>
+                    <h1 class="text-xl font-bold ml-2 text-header">Chronos Tracker</h1>
+                </div>
+                <button id="close-sidebar-btn" class="md:hidden text-secondary hover:text-header">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <!-- Navigation -->
+            <nav>
+                <ul class="space-y-2">
+                    <li><a href="#dashboard" class="sidebar-link active" data-view="dashboard">Dashboard</a></li>
+                    <li><a href="#summary" class="sidebar-link" data-view="summary">Riepilogo</a></li>
+                    <li><a href="#timeline" class="sidebar-link" data-view="timeline">Timeline</a></li>
+                    <li><a href="#custom-events" class="sidebar-link" data-view="custom-events">Eventi Personali</a></li>
+                    <li><a href="#calculator" class="sidebar-link" data-view="calculator">Calcolatore</a></li>
+                    <li><a href="#family" class="sidebar-link" data-view="family">Traguardi Famiglia</a></li>
+                </ul>
+            </nav>
+            
+            <!-- Person Management -->
+            <div class="flex flex-col">
+                <button id="open-add-person-modal-btn" class="w-full text-sm accent accent-hover p-2 rounded-md transition-colors mb-4">Aggiungi Profilo</button>
+                <label for="person-select" class="text-sm font-medium text-secondary mb-2 block">Gestione Famiglia</label>
+                <select id="person-select" class="w-full p-2.5 text-sm mb-2"></select>
+                <button id="delete-person-btn" class="w-full text-sm bg-red-600 hover:bg-red-700 p-2 rounded-md transition-colors text-white">Elimina Selezionato</button>
+            </div>
+
+            <div class="pt-4 mt-auto">
+                 <label for="theme-selector" class="text-sm font-medium text-secondary mb-2 block">Tema</label>
+                 <select id="theme-selector" class="w-full theme-select">
+                    <option value="theme-dark">Scuro</option>
+                    <option value="theme-light">Chiaro</option>
+                    <option value="theme-blue">Blu</option>
+                 </select>
+            </div>
+
+            <footer class="text-center text-gray-500 text-xs pt-2">
+                <p>© 2025 Giancarlo Tessarolo. Tutti i diritti riservati.</p>
+            </footer>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto bg-main">
+            <button id="open-sidebar-btn" class="md:hidden fixed top-4 left-4 z-20 bg-sidebar p-2 rounded-md text-header">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+            </button>
+            
+            <div id="no-person-view" class="text-center h-full flex flex-col justify-center items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600 mb-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <h2 class="text-3xl font-bold text-header mb-4">Benvenuto!</h2>
+                <p class="text-secondary mb-6 max-w-md">Per iniziare, aggiungi il primo membro della tua famiglia usando il pulsante "Aggiungi Profilo".</p>
+            </div>
+            
+            <div id="main-content-views" class="hidden">
+                 <div id="dashboard" class="view active space-y-8">
+                    <section class="card bg-card">
+                        <h2 class="text-2xl font-bold mb-4 accent-text-color">Età di <span class="active-person-name"></span></h2>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4" id="age-display"></div>
+                         <div class="grid grid-cols-1 mt-4"><div class="time-unit"><div id="seconds-value" class="time-value">0</div><div class="time-label">SECONDI TOTALI</div></div></div>
+                    </section>
+                    <section class="card bg-card">
+                        <h2 class="text-2xl font-bold mb-4 accent-text-color">Statistiche Biometriche Stimate</h2>
+                        <div id="biometrics-display" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+                    </section>
+                     <section class="card bg-card">
+                        <h2 class="text-2xl font-bold mb-4 accent-text-color">Prossimi 5 Traguardi di <span class="active-person-name"></span></h2>
+                         <ul id="upcoming-milestones-list" class="space-y-3"></ul>
+                    </section>
+                </div>
+                <div id="summary" class="view"><section class="card bg-card"><h2 class="text-2xl font-bold mb-4 accent-text-color">Riepilogo per <span class="active-person-name"></span></h2><div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-700"><tr><th class="p-3">Unità di Misura</th><th class="p-3">Valore Totale</th></tr></thead><tbody id="summary-table-body"></tbody></table></div></section></div>
+                <div id="timeline" class="view"><section class="card bg-card"><h2 class="text-2xl font-bold mb-4 accent-text-color">Timeline di <span class="active-person-name"></span></h2><div id="timeline-container" class="relative"></div></section></div>
+                <div id="custom-events" class="view"><section class="card bg-card"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold accent-text-color">Eventi Personali di <span class="active-person-name"></span></h2><button id="open-add-event-modal-btn" class="text-sm accent accent-hover p-2 px-4 rounded-md transition-colors">Aggiungi Evento</button></div><ul id="custom-events-list" class="space-y-3"></ul></section></div>
+                <div id="calculator" class="view"><section class="card bg-card"><h2 class="text-2xl font-bold mb-4 accent-text-color">Calcolatore Traguardi</h2><p class="text-secondary mb-4">Scopri quando <span class="active-person-name"></span> raggiungerà un traguardo.</p><div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"><div><label class="block mb-2 text-sm font-medium">Unità</label><select id="milestone-unit" class="w-full"><option value="seconds">Secondi</option><option value="minutes">Minuti</option><option value="hours">Ore</option><option value="days">Giorni</option><option value="weeks">Settimane</option><option value="months">Mesi</option><option value="years">Anni</option></select></div><div><label class="block mb-2 text-sm font-medium">Traguardo</label><input type="number" id="milestone-target" placeholder="es. 10000" class="w-full"></div><div class="text-center text-secondary text-sm">Attuale: <span id="current-milestone-value" class="font-bold text-main">0</span></div></div><div id="milestone-result-container" class="mt-6 text-center p-4 bg-main rounded-lg hidden"><p class="text-lg">Data del traguardo:</p><p id="milestone-result-date" class="text-2xl font-bold accent-text-color mt-1"></p><div id="calendar-link-wrapper" class="mt-4"></div></div></section></div>
+                <div id="family" class="view"><section class="card bg-card"><h2 class="text-2xl font-bold mb-4 accent-text-color">Traguardi Familiari</h2><p class="text-secondary mb-4">I prossimi 10 traguardi più vicini per tutti i membri.</p><ul id="family-milestones-list" class="space-y-3"></ul></section></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="add-person-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden items-center justify-center"><div class="card bg-sidebar w-full max-w-md m-4"><h2 class="text-xl font-bold text-header mb-4">Aggiungi Profilo</h2><div class="space-y-4"><input type="text" id="modal-new-person-name" placeholder="Nome" class="w-full text-sm"><div><label class="text-sm text-secondary">Data di nascita</label><input type="date" id="modal-birthdate" class="w-full text-sm"></div><div><label class="text-sm text-secondary">Ora di nascita</label><input type="time" id="modal-birthtime" class="w-full text-sm"></div><div class="flex justify-end space-x-3 pt-2"><button id="modal-cancel-btn" class="text-sm bg-gray-600 hover:bg-gray-700 p-2 px-4 rounded-md transition-colors text-white">Annulla</button><button id="modal-add-btn" class="text-sm accent accent-hover p-2 px-4 rounded-md transition-colors">Salva</button></div></div></div></div>
+    <div id="add-event-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden items-center justify-center"><div class="card bg-sidebar w-full max-w-md m-4"><h2 class="text-xl font-bold text-header mb-4">Aggiungi Evento Personale</h2><div class="space-y-4"><input type="text" id="modal-event-name" placeholder="Nome evento (es. Laurea)" class="w-full text-sm"><div><label class="text-sm text-secondary">Data evento</label><input type="date" id="modal-event-date" class="w-full text-sm"></div><div><label class="text-sm text-secondary">Ora evento</label><input type="time" id="modal-event-time" class="w-full text-sm" value="00:00"></div><div class="flex justify-end space-x-3 pt-2"><button id="modal-event-cancel-btn" class="text-sm bg-gray-600 hover:bg-gray-700 p-2 px-4 rounded-md transition-colors text-white">Annulla</button><button id="modal-event-add-btn" class="text-sm accent accent-hover p-2 px-4 rounded-md transition-colors">Salva Evento</button></div></div></div></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // PWA Setup
+            const setupPWA = () => {
+                const manifest = { "name": "Chronos LifeTracker", "short_name": "ChronosTracker", "start_url": ".", "display": "standalone", "background_color": "#030712", "theme_color": "#10b981", "description": "Traccia il tempo della tua vita.", "icons": [{"src": "/icon-192x192.png", "sizes": "192x192", "type": "image/png"}, {"src": "/icon-512x512.png", "sizes": "512x512", "type": "image/png"}] };
+                const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+                const manifestURL = URL.createObjectURL(manifestBlob);
+                document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="${manifestURL}">`);
+            };
+            setupPWA();
+
+            // DOM Elements
+            const personSelect = document.getElementById('person-select');
+            const deletePersonBtn = document.getElementById('delete-person-btn');
+            const mainContentViews = document.getElementById('main-content-views');
+            const noPersonView = document.getElementById('no-person-view');
+            const activePersonNameSpans = document.querySelectorAll('.active-person-name');
+            
+            // Views & Lists
+            const upcomingMilestonesList = document.getElementById('upcoming-milestones-list');
+            const summaryTableBody = document.getElementById('summary-table-body');
+            const familyMilestonesList = document.getElementById('family-milestones-list');
+            const biometricsDisplay = document.getElementById('biometrics-display');
+            const customEventsList = document.getElementById('custom-events-list');
+            const timelineContainer = document.getElementById('timeline-container');
+            
+            // Modals
+            const addPersonModal = document.getElementById('add-person-modal');
+            const openAddPersonModalBtn = document.getElementById('open-add-person-modal-btn');
+            const modalCancelBtn = document.getElementById('modal-cancel-btn');
+            const modalAddBtn = document.getElementById('modal-add-btn');
+            const addEventModal = document.getElementById('add-event-modal');
+            const openAddEventModalBtn = document.getElementById('open-add-event-modal-btn');
+            const modalEventCancelBtn = document.getElementById('modal-event-cancel-btn');
+            const modalEventAddBtn = document.getElementById('modal-event-add-btn');
+
+            // Responsive sidebar
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            const openSidebarBtn = document.getElementById('open-sidebar-btn');
+            const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+            
+            // Theme selector
+            const themeSelector = document.getElementById('theme-selector');
+
+            // State
+            let people = [];
+            let activePersonId = null;
+            let timerInterval = null;
+
+            // --- Theme Management ---
+            const applyTheme = (theme) => {
+                document.documentElement.className = theme;
+                localStorage.setItem('chronosTheme', theme);
+                themeSelector.value = theme;
+            };
+            const loadTheme = () => applyTheme(localStorage.getItem('chronosTheme') || 'theme-dark');
+            themeSelector.addEventListener('change', () => applyTheme(themeSelector.value));
+
+            // --- Person & Event Management ---
+            const loadPeople = () => {
+                people = JSON.parse(localStorage.getItem('chronosPeople')) || [];
+                activePersonId = localStorage.getItem('chronosActivePersonId');
+                if ((activePersonId && !people.find(p => p.id == activePersonId)) || (!activePersonId && people.length > 0)) {
+                    activePersonId = people.length > 0 ? people[0].id : null;
+                }
+            };
+            
+            const savePeople = () => {
+                localStorage.setItem('chronosPeople', JSON.stringify(people));
+                localStorage.setItem('chronosActivePersonId', activePersonId);
+            };
+
+            const getActivePerson = () => people.find(p => p.id == activePersonId);
+
+            modalAddBtn.addEventListener('click', () => {
+                const name = document.getElementById('modal-new-person-name').value.trim();
+                const birthDate = document.getElementById('modal-birthdate').value;
+                const birthTime = document.getElementById('modal-birthtime').value;
+                if (!name || !birthDate || !birthTime) {
+                    alert("Per favore, compila tutti i campi."); return;
+                }
+                const newPerson = { id: Date.now(), name, birthDate, birthTime, customEvents: [] };
+                people.push(newPerson);
+                activePersonId = newPerson.id;
+                savePeople();
+                renderPersonSelector();
+                startTimerForActivePerson();
+                document.getElementById('modal-new-person-name').value = '';
+                addPersonModal.classList.replace('flex', 'hidden');
+            });
+
+            deletePersonBtn.addEventListener('click', () => {
+                if (!activePersonId) return;
+                if (confirm(`Sei sicuro di voler eliminare il profilo di ${getActivePerson().name}?`)) {
+                    people = people.filter(p => p.id != activePersonId);
+                    activePersonId = people.length > 0 ? people[0].id : null;
+                    savePeople();
+                    renderPersonSelector();
+                    startTimerForActivePerson();
+                }
+            });
+
+            modalEventAddBtn.addEventListener('click', () => {
+                const person = getActivePerson();
+                if (!person) return;
+                const name = document.getElementById('modal-event-name').value.trim();
+                const date = document.getElementById('modal-event-date').value;
+                const time = document.getElementById('modal-event-time').value;
+                if (!name || !date || !time) {
+                    alert("Per favore, compila tutti i campi dell'evento."); return;
+                }
+                person.customEvents = person.customEvents || [];
+                person.customEvents.push({ id: Date.now(), name, date, time });
+                savePeople();
+                updateUI(new Date(person.birthDate + 'T' + person.birthTime));
+                addEventModal.classList.replace('flex', 'hidden');
+            });
+
+            customEventsList.addEventListener('click', e => {
+                if (e.target.classList.contains('delete-event-btn')) {
+                    const eventId = e.target.dataset.id;
+                    const person = getActivePerson();
+                    if (person && confirm('Sei sicuro di voler eliminare questo evento?')) {
+                        person.customEvents = person.customEvents.filter(event => event.id != eventId);
+                        savePeople();
+                        updateUI(new Date(person.birthDate + 'T' + person.birthTime));
+                    }
+                }
+            });
+
+            // --- UI Rendering ---
+            const renderPersonSelector = () => {
+                personSelect.innerHTML = people.map(p => `<option value="${p.id}" ${p.id == activePersonId ? 'selected' : ''}>${p.name}</option>`).join('');
+                toggleMainView();
+            };
+
+            const toggleMainView = () => {
+                const hasPeople = people.length > 0;
+                noPersonView.classList.toggle('hidden', hasPeople);
+                mainContentViews.classList.toggle('hidden', !hasPeople);
+                if (!hasPeople && timerInterval) clearInterval(timerInterval);
+            };
+
+            // --- Core Logic & Updates ---
+            const startTimerForActivePerson = () => {
+                if (timerInterval) clearInterval(timerInterval);
+                const person = getActivePerson();
+                if (!person) { toggleMainView(); return; }
+                
+                activePersonNameSpans.forEach(span => span.textContent = person.name);
+                const birthDateTime = new Date(`${person.birthDate}T${person.birthTime}`);
+                if (isNaN(birthDateTime.getTime())) return;
+                
+                const updateAll = () => updateUI(birthDateTime);
+                updateAll();
+                timerInterval = setInterval(updateAll, 1000);
+            };
+
+            const updateUI = (birthDateTime) => {
+                const now = new Date();
+                const person = getActivePerson();
+                updateLiveAge(now, birthDateTime);
+                updateBiometrics(now, birthDateTime);
+                updateSummaryTable(now, birthDateTime);
+                updateUpcomingMilestones(now, birthDateTime);
+                updateFamilyMilestones(now);
+                updateCustomEventsList(now, person);
+                updateTimeline(now, person);
+                updateCurrentMilestoneValue(now, birthDateTime);
+            };
+
+            const formatDiff = (ms) => {
+                const totalSeconds = Math.floor(ms / 1000);
+                const days = Math.floor(totalSeconds / 86400);
+                const hours = Math.floor((totalSeconds % 86400) / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                return `${days}g ${hours}h ${minutes}m`;
+            }
+
+            const updateLiveAge = (now, birthDateTime) => {
+                const diff = now - birthDateTime;
+                let tempDate = new Date(birthDateTime);
+                const years = now.getFullYear() - birthDateTime.getFullYear() - (now.getMonth() < birthDateTime.getMonth() || (now.getMonth() === birthDateTime.getMonth() && now.getDate() < birthDateTime.getDate()) ? 1 : 0);
+                tempDate.setFullYear(tempDate.getFullYear() + years);
+                let months = 0;
+                while (new Date(tempDate.getFullYear(), tempDate.getMonth() + 1, tempDate.getDate()) <= now) {
+                    tempDate.setMonth(tempDate.getMonth() + 1);
+                    months++;
+                }
+                const days = Math.floor((now - tempDate) / 86400000);
+                const seconds = now.getSeconds() - birthDateTime.getSeconds();
+                const minutes = now.getMinutes() - birthDateTime.getMinutes();
+                const hours = now.getHours() - birthDateTime.getHours();
+
+                document.getElementById('age-display').innerHTML = [
+                    { value: years, label: 'ANNI' }, { value: months, label: 'MESI' }, { value: days, label: 'GIORNI' },
+                    { value: (hours < 0 ? hours + 24 : hours), label: 'ORE' },
+                    { value: (minutes < 0 ? minutes + 60 : minutes), label: 'MINUTI' },
+                    { value: (seconds < 0 ? seconds + 60 : seconds), label: 'SECONDI' }
+                ].map(u => `<div class="time-unit"><div class="time-value">${String(u.value).padStart(2, '0')}</div><div class="time-label">${u.label}</div></div>`).join('');
+                document.getElementById('seconds-value').textContent = Math.floor(diff / 1000).toLocaleString('it-IT');
+            };
+
+            const updateBiometrics = (now, birthDateTime) => {
+                const seconds = (now - birthDateTime) / 1000;
+                const heartbeats = Math.floor(seconds * (70 / 60)); // Avg 70 bpm
+                const breaths = Math.floor(seconds * (16 / 60)); // Avg 16 bpm
+                biometricsDisplay.innerHTML = `
+                    <div class="time-unit"><div class="time-value">${heartbeats.toLocaleString('it-IT')}</div><div class="time-label">BATTITI CARDIACI (stima)</div></div>
+                    <div class="time-unit"><div class="time-value">${breaths.toLocaleString('it-IT')}</div><div class="time-label">RESPIRI (stima)</div></div>`;
+            };
+            
+            const updateCustomEventsList = (now, person) => {
+                if (!person || !person.customEvents) { customEventsList.innerHTML = ''; return; }
+                customEventsList.innerHTML = person.customEvents
+                    .sort((a,b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time))
+                    .map(event => {
+                        const eventDate = new Date(`${event.date}T${event.time}`);
+                        const diff = now - eventDate;
+                        const formattedDiff = diff > 0 ? formatDiff(diff) + ' fa' : 'Futuro';
+                        return `<li class="p-3 bg-card rounded-lg flex justify-between items-center border border-color"><div class="pr-2"><p class="font-bold text-lg accent-text-color">${event.name}</p><p class="text-sm text-secondary">${formattedDiff}</p></div><button data-id="${event.id}" class="delete-event-btn text-red-500 hover:text-red-400">Elimina</button></li>`;
+                    }).join('');
+            };
+
+            const updateTimeline = (now, person) => {
+                if (!person) return;
+                const customEvents = (person.customEvents || []).map(e => ({
+                    date: new Date(`${e.date}T${e.time}`),
+                    text: e.name,
+                    type: 'custom'
+                }));
+                const milestones = getMilestonesForPerson(now, person);
+
+                const allEvents = [...customEvents, ...milestones].sort((a, b) => a.date - b.date);
+
+                timelineContainer.innerHTML = '<div class="timeline-line"></div>' + allEvents.map(event => {
+                    if (!event.date || isNaN(event.date.getTime())) {
+                        console.error("Invalid date found for event:", event);
+                        return ''; // Skip rendering this item
+                    }
+                    const isPast = event.date < now;
+                    const formattedDate = new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: 'long', year: 'numeric' }).format(event.date);
+                    return `<div class="timeline-item"><div class="timeline-point ${isPast ? 'past' : ''}"></div><p class="font-bold text-main">${event.text}</p><p class="text-sm text-secondary">${formattedDate}</p></div>`;
+                }).join('');
+            };
+
+            const getMilestonesForPerson = (now, person) => {
+                const birthDateTime = new Date(`${person.birthDate}T${person.birthTime}`);
+                const units = ['seconds', 'minutes', 'hours', 'days', 'weeks', 'years'];
+                let allMilestones = [];
+
+                units.forEach(unit => {
+                    const currentValue = getTotalValueInUnit(now, birthDateTime, unit);
+                    if (currentValue <= 0) return;
+                    
+                    const futureVal = findNextRoundNumber(currentValue);
+                    addMilestone(futureVal, unit, birthDateTime, allMilestones);
+
+                    const pastVal = findPreviousRoundNumber(currentValue);
+                    if (pastVal > 0) addMilestone(pastVal, unit, birthDateTime, allMilestones);
+                });
+                return [...new Map(allMilestones.map(item => [item.text, item])).values()];
+            };
+
+            const addMilestone = (value, unit, birthDateTime, collection) => {
+                let milestoneDate;
+                if (unit === 'years') {
+                    milestoneDate = new Date(birthDateTime.getFullYear() + Math.ceil(value), birthDateTime.getMonth(), birthDateTime.getDate(), birthDateTime.getHours(), birthDateTime.getMinutes());
+                } else {
+                    const msPerUnit = { seconds: 1000, minutes: 60000, hours: 3600000, days: 86400000, weeks: 604800000 }[unit];
+                    milestoneDate = new Date(birthDateTime.getTime() + value * msPerUnit);
+                }
+                collection.push({ value: value, unit: unit, date: milestoneDate, text: `${value.toLocaleString('it-IT')} ${unit}` });
+            };
+
+            const findNextRoundNumber = (currentValue) => {
+                if (currentValue <= 0) return 10;
+                const powerOf10 = Math.pow(10, Math.floor(Math.log10(currentValue)));
+                let nextValue = Math.ceil(currentValue / powerOf10) * powerOf10;
+                if (nextValue <= currentValue) nextValue += powerOf10;
+                return nextValue;
+            };
+
+            const findPreviousRoundNumber = (currentValue) => {
+                if (currentValue <= 10) return 0;
+                const powerOf10 = Math.pow(10, Math.floor(Math.log10(currentValue)));
+                let prevValue = Math.floor(currentValue / powerOf10) * powerOf10;
+                if (prevValue >= currentValue) prevValue -= powerOf10;
+                return prevValue;
+            };
+            
+            const getTotalValueInUnit = (now, birthDateTime, unit) => {
+                const diff = now.getTime() - birthDateTime.getTime();
+                switch (unit) {
+                    case 'seconds': return diff / 1000;
+                    case 'minutes': return diff / 60000;
+                    case 'hours': return diff / 3600000;
+                    case 'days': return diff / 86400000;
+                    case 'weeks': return diff / 604800000;
+                    case 'months': return (now.getFullYear() - birthDateTime.getFullYear()) * 12 + (now.getMonth() - birthDateTime.getMonth());
+                    case 'years': return diff / 31557600000; // 365.25 days for leap years
+                    default: return 0;
+                }
+            };
+            
+            const renderMilestoneLi = (milestone, person, isFamily = false) => {
+                const unitLabel = { seconds: 'secondi', minutes: 'minuti', hours: 'ore', days: 'giorni', weeks: 'settimane', years: 'anni'}[milestone.unit];
+                const title = `Traguardo di ${person.name}: ${milestone.value.toLocaleString('it-IT')} ${unitLabel}`;
+                const description = `Il giorno in cui ${person.name} raggiungerà ${milestone.value.toLocaleString('it-IT')} ${unitLabel} di vita.`;
+                const calendarHref = generateCalendarLink(title, milestone.date, description);
+                const formatter = new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+                
+                const saveButton = milestone.date > new Date() 
+                    ? `<a href="${calendarHref}" target="_blank" rel="noopener noreferrer" class="text-sm accent accent-hover p-2 rounded-md transition-colors">Salva</a>` 
+                    : '';
+
+                return `<li class="p-3 bg-main rounded-lg flex justify-between items-center border border-color"><div class="pr-2"><p class="font-bold text-lg accent-text-color">${milestone.value.toLocaleString('it-IT')} ${unitLabel} ${isFamily ? `<span class="text-sm font-medium text-main"> - ${person.name}</span>` : ''}</p><p class="text-sm text-secondary">${formatter.format(milestone.date)}</p></div><div>${saveButton}</div></li>`;
+            };
+
+            const generateCalendarLink = (title, date, description) => {
+                const formatDateForGoogle = (d) => d.toISOString().replace(/-|:|\.\d+/g, '');
+                const startDate = formatDateForGoogle(date);
+                const endDate = formatDateForGoogle(new Date(date.getTime() + 60 * 60 * 1000));
+                return `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startDate}/${endDate}&details=${encodeURIComponent(description)}`;
+            };
+            
+            const updateSummaryTable = (now, birthDateTime) => {
+                const units = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'];
+                const labels = {'years': 'Anni', 'months': 'Mesi', 'weeks': 'Settimane', 'days': 'Giorni', 'hours': 'Ore', 'minutes': 'Minuti', 'seconds': 'Secondi'};
+                summaryTableBody.innerHTML = units.map(unit => `<tr class="border-b border-color"><td class="p-3 font-medium">${labels[unit]}</td><td class="p-3 accent-text-color font-mono">${Math.floor(getTotalValueInUnit(now, birthDateTime, unit)).toLocaleString('it-IT')}</td></tr>`).join('');
+            };
+
+            const updateUpcomingMilestones = (now, birthDateTime) => {
+                const person = getActivePerson();
+                if (!person) return;
+                const upcoming = getMilestonesForPerson(now, person)
+                    .filter(m => m.date > now)
+                    .sort((a,b) => a.date - b.date);
+                upcomingMilestonesList.innerHTML = upcoming.slice(0, 5).map(m => renderMilestoneLi(m, person)).join('');
+            };
+
+            const updateFamilyMilestones = (now) => {
+                if (people.length === 0) return;
+                let allMilestones = [];
+                people.forEach(person => {
+                    const personMilestones = getMilestonesForPerson(now, person)
+                        .filter(m => m.date > now)
+                        .map(m => ({ ...m, person }));
+                    allMilestones.push(...personMilestones);
+                });
+                allMilestones.sort((a, b) => a.date - b.date);
+                familyMilestonesList.innerHTML = allMilestones.slice(0, 10).map(m => renderMilestoneLi(m, m.person, true)).join('');
+            };
+
+            const updateCurrentMilestoneValue = (now, birthDateTime) => { 
+                const unit = document.getElementById('milestone-unit').value; 
+                document.getElementById('current-milestone-value').textContent = Math.floor(getTotalValueInUnit(now, birthDateTime, unit)).toLocaleString('it-IT'); 
+            };
+
+            // --- Init and Event Listeners ---
+            const init = () => {
+                loadTheme();
+                loadPeople();
+                renderPersonSelector();
+                startTimerForActivePerson();
+                setupNavigation();
+                
+                const setupModal = (openBtn, modal, cancelBtn) => {
+                    openBtn.addEventListener('click', () => modal.classList.replace('hidden', 'flex'));
+                    cancelBtn.addEventListener('click', () => modal.classList.replace('flex', 'hidden'));
+                    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.replace('flex', 'hidden'); });
+                };
+                setupModal(openAddPersonModalBtn, addPersonModal, modalCancelBtn);
+                setupModal(openAddEventModalBtn, addEventModal, modalEventCancelBtn);
+                
+                personSelect.addEventListener('change', () => {
+                    activePersonId = personSelect.value;
+                    savePeople();
+                    startTimerForActivePerson();
+                });
+            };
+
+            const setupNavigation = () => {
+                const links = document.querySelectorAll('.sidebar-link');
+                const views = document.querySelectorAll('.view');
+                links.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const viewId = link.getAttribute('data-view');
+                        views.forEach(view => view.classList.remove('active'));
+                        document.getElementById(viewId).classList.add('active');
+                        links.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+                        if (window.innerWidth < 768) closeSidebar();
+                    });
+                });
+            };
+
+            const openSidebar = () => { sidebar.classList.remove('-translate-x-full'); sidebarOverlay.classList.remove('hidden'); };
+            const closeSidebar = () => { sidebar.classList.add('-translate-x-full'); sidebarOverlay.classList.add('hidden'); };
+            openSidebarBtn.addEventListener('click', openSidebar);
+            closeSidebarBtn.addEventListener('click', closeSidebar);
+            sidebarOverlay.addEventListener('click', closeSidebar);
+
+            init();
+        });
+    </script>
+</body>
+</html>
+
+
