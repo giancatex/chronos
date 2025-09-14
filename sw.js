@@ -1,11 +1,12 @@
-const CACHE_NAME = 'chronos-lifetracker-cache-v2'; // Aumento la versione per forzare l'aggiornamento
+const CACHE_NAME = 'chronos-lifetracker-cache-v1';
 const urlsToCache = [
-  '.',
+  '/',
   'index.html',
-  'manifest.json',
-  'icons/icon.svg' // Aggiungo solo l'icona SVG alla cache
+  'logo.png'
+  // Aggiungi qui altri file statici che vuoi mettere in cache, es. CSS o altri JS
 ];
 
+// Evento di installazione: viene eseguito quando il Service Worker viene registrato per la prima volta.
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -16,23 +17,30 @@ self.addEventListener('install', event => {
   );
 });
 
+// Evento di fetch: intercetta tutte le richieste di rete fatte dalla pagina.
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Se la risorsa è in cache, la restituisco, altrimenti la richiedo alla rete
-        return response || fetch(event.request);
-      })
+        // Se la risorsa è già in cache, la restituisce.
+        if (response) {
+          return response;
+        }
+        // Altrimenti, esegue la richiesta di rete.
+        return fetch(event.request);
+      }
+    )
   );
 });
 
+// Evento di attivazione: viene eseguito quando il Service Worker viene attivato.
+// Utile per pulire vecchie cache non più necessarie.
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          // Rimuovo le vecchie versioni della cache
           if (cacheWhitelist.indexOf(cacheName) === -1) {
             return caches.delete(cacheName);
           }
