@@ -1,7 +1,8 @@
 const CACHE_NAME = 'chronos-lifetracker-cache-v1';
 const urlsToCache = [
-  '/',
-  '/index.html'
+  '.',
+  'index.html',
+  'manifest.json'
 ];
 
 self.addEventListener('install', event => {
