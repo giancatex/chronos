@@ -268,8 +268,8 @@
             // PWA Service Worker Registration
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/sw.js').then(registration => {
-                        console.log('Service Worker registrato con successo:', registration);
+                    navigator.serviceWorker.register('sw.js', { scope: '.' }).then(registration => {
+                        console.log('Service Worker registrato con successo con scope:', registration.scope);
                     }).catch(registrationError => {
                         console.log('Registrazione Service Worker fallita:', registrationError);
                     });
@@ -300,6 +300,13 @@
             const openAddEventModalBtn = document.getElementById('open-add-event-modal-btn');
             const modalEventCancelBtn = document.getElementById('modal-event-cancel-btn');
             const modalEventAddBtn = document.getElementById('modal-event-add-btn');
+
+            // Calculator
+            const milestoneUnit = document.getElementById('milestone-unit');
+            const milestoneTarget = document.getElementById('milestone-target');
+            const milestoneResultContainer = document.getElementById('milestone-result-container');
+            const milestoneResultDate = document.getElementById('milestone-result-date');
+            const calendarLinkWrapper = document.getElementById('calendar-link-wrapper');
 
             // Responsive sidebar
             const sidebar = document.getElementById('sidebar');
@@ -359,7 +366,8 @@
 
             deletePersonBtn.addEventListener('click', () => {
                 if (!activePersonId) return;
-                if (confirm(`Sei sicuro di voler eliminare il profilo di ${getActivePerson().name}?`)) {
+                const person = getActivePerson();
+                if (person && confirm(`Sei sicuro di voler eliminare il profilo di ${person.name}?`)) {
                     people = people.filter(p => p.id != activePersonId);
                     activePersonId = people.length > 0 ? people[0].id : null;
                     savePeople();
@@ -382,6 +390,7 @@
                 savePeople();
                 updateUI(new Date(person.birthDate + 'T' + person.birthTime));
                 addEventModal.classList.replace('flex', 'hidden');
+                document.getElementById('modal-event-name').value = '';
             });
 
             customEventsList.addEventListener('click', e => {
@@ -427,6 +436,7 @@
             const updateUI = (birthDateTime) => {
                 const now = new Date();
                 const person = getActivePerson();
+                if (!person) return;
                 updateLiveAge(now, birthDateTime);
                 updateBiometrics(now, birthDateTime);
                 updateSummaryTable(now, birthDateTime);
@@ -436,7 +446,7 @@
                 updateTimeline(now, person);
                 updateCurrentMilestoneValue(now, birthDateTime);
             };
-
+            
             const formatDiff = (ms) => {
                 const totalSeconds = Math.floor(ms / 1000);
                 const days = Math.floor(totalSeconds / 86400);
@@ -446,27 +456,29 @@
             }
 
             const updateLiveAge = (now, birthDateTime) => {
-                const diff = now - birthDateTime;
                 let tempDate = new Date(birthDateTime);
-                const years = now.getFullYear() - birthDateTime.getFullYear() - (now.getMonth() < birthDateTime.getMonth() || (now.getMonth() === birthDateTime.getMonth() && now.getDate() < birthDateTime.getDate()) ? 1 : 0);
-                tempDate.setFullYear(tempDate.getFullYear() + years);
-                let months = 0;
-                while (new Date(tempDate.getFullYear(), tempDate.getMonth() + 1, tempDate.getDate()) <= now) {
-                    tempDate.setMonth(tempDate.getMonth() + 1);
-                    months++;
+                let years = now.getFullYear() - birthDateTime.getFullYear();
+                let months = now.getMonth() - birthDateTime.getMonth();
+                let days = now.getDate() - birthDateTime.getDate();
+                let hours = now.getHours() - birthDateTime.getHours();
+                let minutes = now.getMinutes() - birthDateTime.getMinutes();
+                let seconds = now.getSeconds() - birthDateTime.getSeconds();
+
+                if (seconds < 0) { minutes--; seconds += 60; }
+                if (minutes < 0) { hours--; minutes += 60; }
+                if (hours < 0) { days--; hours += 24; }
+                if (days < 0) {
+                    months--;
+                    const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+                    days += prevMonth.getDate();
                 }
-                const days = Math.floor((now - tempDate) / 86400000);
-                const seconds = now.getSeconds() - birthDateTime.getSeconds();
-                const minutes = now.getMinutes() - birthDateTime.getMinutes();
-                const hours = now.getHours() - birthDateTime.getHours();
+                if (months < 0) { years--; months += 12; }
 
                 document.getElementById('age-display').innerHTML = [
                     { value: years, label: 'ANNI' }, { value: months, label: 'MESI' }, { value: days, label: 'GIORNI' },
-                    { value: (hours < 0 ? hours + 24 : hours), label: 'ORE' },
-                    { value: (minutes < 0 ? minutes + 60 : minutes), label: 'MINUTI' },
-                    { value: (seconds < 0 ? seconds + 60 : seconds), label: 'SECONDI' }
+                    { value: hours, label: 'ORE' }, { value: minutes, label: 'MINUTI' }, { value: seconds, label: 'SECONDI' }
                 ].map(u => `<div class="time-unit"><div class="time-value">${String(u.value).padStart(2, '0')}</div><div class="time-label">${u.label}</div></div>`).join('');
-                document.getElementById('seconds-value').textContent = Math.floor(diff / 1000).toLocaleString('it-IT');
+                document.getElementById('seconds-value').textContent = Math.floor((now - birthDateTime) / 1000).toLocaleString('it-IT');
             };
 
             const updateBiometrics = (now, birthDateTime) => {
@@ -486,7 +498,7 @@
                         const eventDate = new Date(`${event.date}T${event.time}`);
                         const diff = now - eventDate;
                         const formattedDiff = diff > 0 ? formatDiff(diff) + ' fa' : 'Futuro';
-                        return `<li class="p-3 bg-card rounded-lg flex justify-between items-center border border-color"><div class="pr-2"><p class="font-bold text-lg accent-text-color">${event.name}</p><p class="text-sm text-secondary">${formattedDiff}</p></div><button data-id="${event.id}" class="delete-event-btn text-red-500 hover:text-red-400">Elimina</button></li>`;
+                        return `<li class="p-3 bg-card rounded-lg flex justify-between items-center border border-color"><div class="pr-2"><p class="font-bold text-lg accent-text-color">${event.name}</p><p class="text-sm text-secondary">${eventDate.toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' })} - ${formattedDiff}</p></div><button data-id="${event.id}" class="delete-event-btn text-red-500 hover:text-red-400 p-2 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button></li>`;
                     }).join('');
             };
 
@@ -502,10 +514,7 @@
                 const allEvents = [...customEvents, ...milestones].sort((a, b) => a.date - b.date);
 
                 timelineContainer.innerHTML = '<div class="timeline-line"></div>' + allEvents.map(event => {
-                    if (!event.date || isNaN(event.date.getTime())) {
-                        console.error("Data non valida trovata per l'evento:", event);
-                        return ''; // Salta questo elemento
-                    }
+                    if (!event.date || isNaN(event.date.getTime())) return '';
                     const isPast = event.date < now;
                     const formattedDate = new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: 'long', year: 'numeric' }).format(event.date);
                     return `<div class="timeline-item"><div class="timeline-point ${isPast ? 'past' : ''}"></div><p class="font-bold text-main">${event.text}</p><p class="text-sm text-secondary">${formattedDate}</p></div>`;
@@ -533,8 +542,13 @@
             const addMilestone = (value, unit, birthDateTime, collection) => {
                 let milestoneDate;
                 if (unit === 'years') {
-                    milestoneDate = new Date(birthDateTime.getFullYear() + Math.ceil(value), birthDateTime.getMonth(), birthDateTime.getDate(), birthDateTime.getHours(), birthDateTime.getMinutes());
-                } else {
+                    milestoneDate = new Date(birthDateTime);
+                    milestoneDate.setFullYear(birthDateTime.getFullYear() + Math.ceil(value));
+                } else if (unit === 'months') {
+                     milestoneDate = new Date(birthDateTime);
+                     milestoneDate.setMonth(birthDateTime.getMonth() + Math.ceil(value));
+                }
+                else {
                     const msPerUnit = { seconds: 1000, minutes: 60000, hours: 3600000, days: 86400000, weeks: 604800000 }[unit];
                     milestoneDate = new Date(birthDateTime.getTime() + value * msPerUnit);
                 }
@@ -543,18 +557,26 @@
 
             const findNextRoundNumber = (currentValue) => {
                 if (currentValue <= 0) return 10;
-                const powerOf10 = Math.pow(10, Math.floor(Math.log10(currentValue)));
-                let nextValue = Math.ceil(currentValue / powerOf10) * powerOf10;
-                if (nextValue <= currentValue) nextValue += powerOf10;
+                const orderOfMagnitude = Math.pow(10, Math.floor(Math.log10(currentValue)));
+                let nextValue = Math.ceil(currentValue / orderOfMagnitude) * orderOfMagnitude;
+                if (nextValue * 0.95 <= currentValue) { // To avoid getting same number
+                    nextValue += orderOfMagnitude;
+                }
+                if (nextValue === 0) nextValue = orderOfMagnitude; // Handle edge case
+                 // Special logic for smaller numbers
+                if(currentValue < 100) {
+                   if (currentValue < 10) return 10;
+                   if (currentValue < 25) return 25;
+                   if (currentValue < 50) return 50;
+                   return 100;
+                }
                 return nextValue;
             };
 
             const findPreviousRoundNumber = (currentValue) => {
                 if (currentValue <= 10) return 0;
-                const powerOf10 = Math.pow(10, Math.floor(Math.log10(currentValue)));
-                let prevValue = Math.floor(currentValue / powerOf10) * powerOf10;
-                if (prevValue >= currentValue) prevValue -= powerOf10;
-                return prevValue;
+                const orderOfMagnitude = Math.pow(10, Math.floor(Math.log10(currentValue)));
+                return Math.floor(currentValue / orderOfMagnitude) * orderOfMagnitude;
             };
             
             const getTotalValueInUnit = (now, birthDateTime, unit) => {
@@ -572,7 +594,7 @@
             };
             
             const renderMilestoneLi = (milestone, person, isFamily = false) => {
-                const unitLabel = { seconds: 'secondi', minutes: 'minuti', hours: 'ore', days: 'giorni', weeks: 'settimane', years: 'anni'}[milestone.unit];
+                const unitLabel = { seconds: 'secondi', minutes: 'minuti', hours: 'ore', days: 'giorni', weeks: 'settimane', months: 'mesi', years: 'anni'}[milestone.unit];
                 const title = `Traguardo di ${person.name}: ${milestone.value.toLocaleString('it-IT')} ${unitLabel}`;
                 const description = `Il giorno in cui ${person.name} raggiungerà ${milestone.value.toLocaleString('it-IT')} ${unitLabel} di vita.`;
                 const calendarHref = generateCalendarLink(title, milestone.date, description);
@@ -619,11 +641,60 @@
                 allMilestones.sort((a, b) => a.date - b.date);
                 familyMilestonesList.innerHTML = allMilestones.slice(0, 10).map(m => renderMilestoneLi(m, m.person, true)).join('');
             };
+            
+            const calculateAndDisplayMilestone = () => {
+                const person = getActivePerson();
+                if (!person) return;
+
+                const birthDateTime = new Date(`${person.birthDate}T${person.birthTime}`);
+                const unit = milestoneUnit.value;
+                const target = parseFloat(milestoneTarget.value);
+
+                if (isNaN(target) || target <= 0) {
+                    milestoneResultContainer.classList.add('hidden');
+                    return;
+                }
+
+                let resultDate;
+                 if (unit === 'years') {
+                    resultDate = new Date(birthDateTime);
+                    resultDate.setFullYear(birthDateTime.getFullYear() + target);
+                } else if (unit === 'months') {
+                     resultDate = new Date(birthDateTime);
+                     resultDate.setMonth(birthDateTime.getMonth() + target);
+                }
+                else {
+                    const msPerUnit = { seconds: 1000, minutes: 60000, hours: 3600000, days: 86400000, weeks: 604800000 }[unit];
+                    resultDate = new Date(birthDateTime.getTime() + target * msPerUnit);
+                }
+                
+                milestoneResultDate.textContent = resultDate.toLocaleString('it-IT', { dateStyle: 'full', timeStyle: 'medium' });
+
+                const calendarTitle = `Raggiungere ${target.toLocaleString('it-IT')} ${unit} di vita`;
+                const calendarDescription = `Un traguardo speciale per ${person.name}.`;
+                const calendarLink = generateCalendarLink(calendarTitle, resultDate, calendarDescription);
+
+                if (resultDate > new Date()) {
+                    calendarLinkWrapper.innerHTML = `<a href="${calendarLink}" target="_blank" rel="noopener noreferrer" class="text-sm accent accent-hover p-2 px-4 rounded-md transition-colors">Aggiungi al Calendario</a>`;
+                } else {
+                    calendarLinkWrapper.innerHTML = `<p class="text-sm text-secondary">(Traguardo già raggiunto)</p>`;
+                }
+                
+                milestoneResultContainer.classList.remove('hidden');
+            };
 
             const updateCurrentMilestoneValue = (now, birthDateTime) => { 
                 const unit = document.getElementById('milestone-unit').value; 
                 document.getElementById('current-milestone-value').textContent = Math.floor(getTotalValueInUnit(now, birthDateTime, unit)).toLocaleString('it-IT'); 
+                calculateAndDisplayMilestone();
             };
+
+            milestoneUnit.addEventListener('change', () => {
+                 const person = getActivePerson();
+                 if(person) updateCurrentMilestoneValue(new Date(), new Date(`${person.birthDate}T${person.birthTime}`));
+            });
+            milestoneTarget.addEventListener('input', calculateAndDisplayMilestone);
+
 
             // --- Init and Event Listeners ---
             const init = () => {
